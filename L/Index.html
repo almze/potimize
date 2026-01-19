@@ -1,0 +1,1134 @@
+<html lang="ar" dir="rtl" class="scroll-smooth"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Potimize X MyTouch</title>
+    <!-- Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <style>
+      /* Imported Readex Pro for the Hero styling to match the requested image */
+      @import url('https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Readex+Pro:wght@300;400;500;600;700&display=swap');
+
+      /* --- CORE VARIABLES --- */
+      :root {
+          --bg-color: #050608;
+          --surface: #0F1115;
+          --text-main: #F2F2F3;
+          --text-muted: #94A3B8;
+          --brand-blue: #1E40AF; /* Royal Blue */
+          --brand-cyan: #22D3EE; /* Cyan/Turquoise */
+          --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+          --ease-in-out: cubic-bezier(0.86, 0, 0.07, 1);
+      }
+
+      /* --- BASE SETTINGS --- */
+      body {
+          background-color: var(--bg-color);
+          color: var(--text-main);
+          font-family: 'IBM Plex Sans Arabic', sans-serif;
+          overflow-x: hidden;
+          cursor: none;
+          -webkit-font-smoothing: antialiased;
+      }
+
+      .font-display { font-family: 'Alexandria', sans-serif; }
+      .font-hero { font-family: 'Readex Pro', sans-serif; } /* New Font Class */
+      .font-mono { font-family: 'JetBrains Mono', monospace; }
+      .tracking-tight { letter-spacing: -0.02em; }
+      .tracking-tighter { letter-spacing: -0.04em; }
+      .tracking-widest { letter-spacing: 0.1em; }
+
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+      ::selection {
+          background-color: var(--brand-cyan);
+          color: #000;
+      }
+
+      /* --- UI UTILS --- */
+      .section-label {
+          position: absolute; top: 1.5rem; right: 1.5rem;
+          z-index: 20;
+          font-family: 'JetBrains Mono', monospace; font-size: 10px;
+          letter-spacing: 0.1em; color: var(--brand-cyan); border: 1px solid rgba(34, 211, 238, 0.2);
+          padding: 4px 8px; border-radius: 4px; text-transform: uppercase;
+          background: rgba(5, 6, 8, 0.8); backdrop-filter: blur(4px);
+      }
+
+      /* --- FX: NOISE --- */
+      .noise-overlay {
+          position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+          pointer-events: none; z-index: 90; opacity: 0.04;
+          background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      }
+
+      /* --- FX: PRELOADER --- */
+      #preloader {
+          position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+          background: var(--bg-color); z-index: 9999;
+          display: flex; justify-content: center; align-items: center;
+          flex-direction: column;
+          transition: transform 1s var(--ease-in-out);
+      }
+      #preloader.loaded { transform: translateY(-100%); }
+      .loader-bar { width: 200px; height: 1px; background: #1e293b; margin-top: 20px; position: relative; overflow: hidden; }
+      .loader-progress { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: var(--brand-cyan); transition: width 0.1s linear; box-shadow: 0 0 10px var(--brand-cyan); }
+
+      /* --- FX: CURSOR --- */
+      .cursor-dot {
+          position: fixed; top: 0; left: 0; width: 4px; height: 4px;
+          background: var(--brand-cyan); border-radius: 50%; transform: translate(-50%, -50%); z-index: 9999; pointer-events: none;
+          box-shadow: 0 0 10px var(--brand-cyan);
+      }
+      .cursor-circle {
+          position: fixed; top: 0; left: 0; width: 32px; height: 32px;
+          border: 1px solid rgba(34, 211, 238, 0.3); border-radius: 50%;
+          transform: translate(-50%, -50%); z-index: 9998; pointer-events: none;
+          transition: width 0.3s, height 0.3s, background-color 0.3s, border-color 0.3s;
+      }
+      .cursor-circle.hovered { width: 64px; height: 64px; background-color: rgba(34, 211, 238, 0.05); border-color: transparent; backdrop-filter: blur(2px); }
+
+      /* --- ANIMATIONS --- */
+      .reveal-item { opacity: 0; transition: all 1.2s var(--ease-out); }
+      .reveal-item.fade-up { transform: translateY(40px); }
+      .reveal-item.fade-up.active { opacity: 1; transform: translateY(0); }
+      .reveal-item.fade-scale { transform: scale(0.96); filter: blur(8px); }
+      .reveal-item.fade-scale.active { opacity: 1; transform: scale(1); filter: blur(0); }
+
+      /* Adjusted split-line for Arabic descenders */
+      .split-line { overflow: hidden; display: block; padding-bottom: 0.2em; margin-bottom: -0.2em; }
+      .split-line span { display: block; transform: translateY(110%); transition: transform 1.2s var(--ease-out); padding-bottom: 10px; }
+      .split-line.active span { transform: translateY(0); }
+
+      /* --- COMPONENTS --- */
+      .img-zoom-bw {
+          transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1), filter 0.5s ease;
+          filter: grayscale(100%) sepia(20%) hue-rotate(170deg) saturate(20%); /* Slight Blue Tint */
+      }
+      .group:hover .img-zoom-bw { transform: scale(1.05); filter: grayscale(0%); }
+
+      .horizontal-section { height: 350vh; position: relative; }
+      .sticky-wrapper { position: relative; display: flex; align-items: flex-start; }
+      .sticky-content { position: sticky; top: 20vh; }
+
+      .video-expand-wrapper {
+          width: 60%; margin: 0 auto; height: 60vh;
+          border-radius: 12px; overflow: hidden; position: relative;
+          transition: width 0.1s linear, border-radius 0.1s linear;
+          border: 1px solid #1e293b;
+      }
+
+      .accordion-container { display: flex; height: 60vh; gap: 1rem; }
+      .accordion-item { flex: 1; position: relative; overflow: hidden; transition: flex 0.8s var(--ease-out); border-radius: 8px; filter: grayscale(100%); border: 1px solid #1e293b; background: #0F1115; }
+      .accordion-item:hover { flex: 3; filter: grayscale(0%); border-color: var(--brand-cyan); }
+      .accordion-content { position: absolute; bottom: 0; left: 0; width: 100%; padding: 2rem; opacity: 0; transform: translateY(20px); transition: all 0.5s 0.2s; background: linear-gradient(to top, #050608, transparent); }
+      .accordion-item:hover .accordion-content { opacity: 1; transform: translateY(0); }
+
+      #network-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; opacity: 0.2; }
+
+      .main-content { position: relative; z-index: 10; background-color: var(--bg-color); margin-bottom: 80vh; box-shadow: 0 50px 50px #000; }
+      .footer-fixed { position: fixed; bottom: 0; left: 0; width: 100%; height: 80vh; z-index: 1; display: flex; align-items: center; justify-content: center; background: #020405; }
+
+      /* Custom Gradient Text */
+      .text-gradient-brand {
+          background: linear-gradient(135deg, #fff 0%, var(--brand-cyan) 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          padding-bottom: 0.1em; /* Extra padding for gradients on text */
+      }
+
+      /* LOGO SVG STYLES for Dark Theme */
+      .cls-1 { fill: #f8fafc; } /* White text for dark bg */
+      .cls-2 { fill: #3b82f6; } /* Brighter Blue */
+      .cls-3 { fill: #22D3EE; } /* Cyan */
+    </style>
+    <style>
+      .section-label { letter-spacing: 0 !important; }
+    </style>
+    <style>
+      @media (max-width: 768px) { .horizontal-section { height: auto !important; } #horizontal-track { transform: none !important; } #horizontal-track > div.w-px { display: none !important; } #horizontal-track > div { width: 100% !important; margin-bottom: 2rem; } #horizontal-track > div:first-child { text-align: right; margin-bottom: 3rem; padding-top: 2rem; } .video-expand-wrapper { width: 90% !important; height: 30vh !important; } }
+    </style>
+  </head>
+  <body class="antialiased">
+    <!-- PRELOADER -->
+    <div id="preloader">
+      <div class="text-xs font-mono font-medium mb-4 tracking-widest text-cyan-500" id="loader-text">
+        ...Potimize System
+      </div>
+      <div class="loader-bar">
+        <div class="loader-progress" id="loader-progress"></div>
+      </div>
+    </div>
+
+    <!-- UI OVERLAYS -->
+    <div class="noise-overlay"></div>
+    <div class="cursor-dot"></div>
+    <div class="cursor-circle"></div>
+    <div id="progress-bar" class="fixed top-0 right-0 h-[2px] bg-cyan-400 z-[100] w-0 transition-all duration-100 ease-linear shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed w-full z-50 px-8 py-6 flex justify-between items-center bg-[#050608]/80 backdrop-blur-md border-b border-white/5">
+      <div class="flex items-center gap-4 group">
+        <!-- Custom Logo SVG -->
+        <div class="h-10 w-auto relative flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8239.44 2233.83" class="h-full w-auto transition-transform duration-500 group-hover:scale-105">
+            <defs>
+              <style>
+                .cls-1{fill:#f8fafc;}.cls-2{fill:#3b82f6;}.cls-3{fill:#22d3ee;}
+              </style>
+            </defs>
+            <g id="Layer_2" data-name="Layer 2">
+              <g id="Layer_1-2" data-name="Layer 1">
+                <path class="cls-1" d="M5258.39,2014.8a9.5,9.5,0,0,1,1.4,4.59v41.78a9.5,9.5,0,0,1-1.4,4.59c-1,1.65-2.83,2.48-5.67,2.48q-46.71,0-81.39-32.57v31.16q0,140.85-134.47,167L5012.08,2178q51-6.39,74.33-31.16t23.35-77.16V1726.38h61.57V1960c8.49,16.53,19,29.34,31.49,38.56s29.14,13.8,49.9,13.8C5255.56,2012.32,5257.44,2013.15,5258.39,2014.8ZM5106.92,1657v-71.5h66.54V1657Z"></path>
+                <path class="cls-1" d="M5224.42,2068.24c-2.84,0-4.72-.95-5.67-2.81a10.86,10.86,0,0,1-1.42-4.26v-41.78a9.33,9.33,0,0,1,1.42-4.59c.95-1.65,2.83-2.48,5.67-2.48h140.13V1726.38h60.88v341.86Zm14.15,151.46v-71.5h66.54v71.5Zm133.05,0v-71.5h66.54v71.5Z"></path>
+                <path class="cls-1" d="M5616.15,1997.44q14.51,14.88,44.24,14.88h14.15c2.83,0,4.71.83,5.67,2.48a9.6,9.6,0,0,1,1.4,4.59v41.78a9.6,9.6,0,0,1-1.4,4.59c-1,1.65-2.84,2.48-5.67,2.48h-25.47q-55.21,0-82.47-31.87t-27.24-83.52V1526.12h62.28v422.52Q5601.64,1982.61,5616.15,1997.44Z"></path>
+                <path class="cls-1" d="M5954.47,1743.37q42.09,24,64,64.06a177.24,177.24,0,0,1,21.95,86.7q0,43.2-15.56,77.16,26.16,41,84.22,41c2.83,0,4.71.83,5.66,2.48a9.52,9.52,0,0,1,1.41,4.59v41.78a9.52,9.52,0,0,1-1.41,4.59c-1,1.65-2.83,2.48-5.66,2.48q-67.26,0-111.13-55.21-47.41,55.23-127.38,55.21H5674.54c-2.83,0-4.71-.95-5.66-2.81a10.86,10.86,0,0,1-1.42-4.26v-41.78a9.33,9.33,0,0,1,1.42-4.59c.95-1.65,2.83-2.48,5.66-2.48h57.32V1734.2q79.29-14.88,122.45-14.88Q5912.33,1719.32,5954.47,1743.37Zm-161,38.23v230.72h68.66q55.2,0,84.93-30.08t29.73-86q0-53.74-31.86-87.41t-90.59-33.6A276.09,276.09,0,0,0,5793.44,1781.6Z"></path>
+                <path class="cls-1" d="M7205.85,1964.18q28.31,48.16,116.07,48.14c2.83,0,4.71.83,5.66,2.48a9.35,9.35,0,0,1,1.43,4.59v41.78a10.92,10.92,0,0,1-1.43,4.26c-.95,1.86-2.83,2.81-5.66,2.81q-49.53,0-81.39-14.18t-55.2-44.55a135.69,135.69,0,0,1-47.42,42.82q-29,15.93-65.11,15.91H6109.09c-2.83,0-4.71-.83-5.66-2.81a9.35,9.35,0,0,1-1.43-4.59v-41.78a9.35,9.35,0,0,1,1.43-4.59c.95-1.65,2.83-2.48,5.66-2.48h952.39q38.9,0,63.68-26.53t24.78-66.91V1723.57h61.57v201A148.41,148.41,0,0,1,7205.85,1964.18Zm-150,255.52v-71.5h66.51v71.5Zm133.05,0v-71.5h66.53v71.5Z"></path>
+                <path class="cls-1" d="M7321.92,2068.24c-2.83,0-4.71-.95-5.66-2.81a10.92,10.92,0,0,1-1.43-4.26v-41.78a9.35,9.35,0,0,1,1.43-4.59c.95-1.65,2.83-2.48,5.66-2.48h140.14V1726.38h60.87v341.86Zm67.94-411.2v-71.5h66.53V1657Zm133.07,0v-71.5h66.52V1657Z"></path>
+                <path class="cls-1" d="M7996.41,2014.8a9.5,9.5,0,0,1,1.4,4.59v41.78a9.5,9.5,0,0,1-1.4,4.59c-.95,1.65-2.83,2.48-5.66,2.48h-71.5q-.7,73.58-41.76,112.9t-121,52.69L7731,2178q64.41-9.91,95.19-34.34t30.79-75.38V1783q-34.68-7.74-63-7.77-53.81,0-84.22,35t-30.44,88.81q0,47.42,29,80.34t81.39,32.89h44.59l-24.77,55.92H7786.2q-53.1,0-91.66-23.35a154.21,154.21,0,0,1-58.75-63q-20.15-39.67-20.16-87.08a180.16,180.16,0,0,1,21.59-86.33q21.57-40.35,63-64.76t97.32-24.42q39.61,0,101.91,12c3.31.5,9.92,1.66,19.82,3.56v277.42h71.5C7993.58,2012.32,7995.46,2013.15,7996.41,2014.8Z"></path>
+                <path class="cls-1" d="M7990.75,2068.24c-2.84,0-4.72-.95-5.67-2.81a10.86,10.86,0,0,1-1.42-4.26v-41.78a9.33,9.33,0,0,1,1.42-4.59c.95-1.65,2.83-2.48,5.67-2.48h89.18V1726.38h61.57v341.86Zm82.09,151.46v-71.5h66.54v71.5Z"></path>
+                <path class="cls-1" d="M2555.53,364.21c-77.72,0-344,8.93-462.78,15.18v1031h259.09V1062h10.72c52.71,21.44,124.18,33.06,204.59,33.06,261.77,0,381.49-116.14,381.49-367.19C2948.64,473.2,2826.24,364.21,2555.53,364.21Zm-25,541.41H2351.84V550h178.68C2635.94,550,2669,592,2669,727.83S2635.94,905.62,2530.52,905.62Z"></path>
+                <path class="cls-1" d="M3464.14,603.64c-288.58,0-411,122.4-411,411s122.39,411,411,411,411-122.39,411-411S3752.71,603.64,3464.14,603.64Zm.89,655.77c-111.67,0-150.09-59.86-150.09-244.8,0-185.83,38.42-243.9,150.09-243.9,114.36,0,148.31,52.71,148.31,243.9S3579.39,1259.41,3465,1259.41Z"></path>
+                <path class="cls-1" d="M4320,1243.32c-53.61,0-75.94-24.11-75.94-81.29V788.58h169.75V618.83H4244.09V394.58l-246.58,14.3v777.27c0,173.32,66.11,239.43,238.54,239.43,72.37,0,151-10.72,201.91-28.59V1243.32Z"></path>
+                <path class="cls-1" d="M4588.05,634.91V1410.4h245.69V618.83Zm125.08-315.37c-115.25,0-146.52,22.33-146.52,104.52s33.06,104.53,146.52,104.53c111.68,0,140.27-22.33,140.27-104.53S4824.81,319.54,4713.13,319.54Z"></path>
+                <path class="cls-1" d="M6331.55,634.91V1410.4h245.69V618.83Zm125.08-315.37c-115.25,0-146.52,22.33-146.52,104.52s33.05,104.53,146.52,104.53c111.67,0,140.26-22.33,140.26-104.53S6568.3,319.54,6456.63,319.54Z"></path>
+                <path class="cls-1" d="M5862.06,603.64c-116.14,0-224.25,24.13-282.32,58.08h-8.93c-55.39-38.43-134.9-58.08-239.44-58.08-92,0-228.71,15.19-349.32,38.42V1410.4h246.58V772.5h113.46c91.13,0,116.15,26.8,116.15,124.18V1410.4h246.58V772.5h114.36c89.34,0,116.14,28.59,116.14,124.18V1410.4H6181.9V905.62C6181.9,692.09,6086.31,603.64,5862.06,603.64Z"></path>
+                <path class="cls-1" d="M7390.7,772.5V618.83H6724.21V802H6969c43.78,0,76.84-.89,115.25-5.36l6.26,9.83c-19.66,15.18-49.14,43.77-81.3,82.19l-285,354.68V1410.4H7390.7V1226.35H7163.77c-49.14,0-88.45,1.79-133.12,8l-6.26-12.51c24.13-25,50.93-56.28,91.13-106.31Z"></path>
+                <path class="cls-1" d="M8239.44,911c0-196.56-117.93-307.34-352.9-307.34-282.32,0-419.9,137.59-419.9,407.4,0,288.57,139.37,414.54,472.61,414.54,91.13,0,191.19-8,265.35-22.33l-17.87-152.78c-64.33,4.47-144.74,7.15-214.42,7.15-194.77,0-260-53.61-263.56-186.72h402C8201.91,1070.9,8239.44,1026.22,8239.44,911Zm-235.86,21.44H7707.86c0-115.25,53.6-175.11,165.28-175.11,89.34,0,130.44,35.73,130.44,115.25Z"></path>
+                <rect class="cls-2" x="263.95" y="233.25" width="342.58" height="888.46" transform="translate(606.53 -109.33) rotate(45)"></rect>
+                <rect class="cls-3" x="527.9" y="141.9" width="685.15" height="685.15" transform="translate(597.53 -473.62) rotate(45)"></rect>
+                <polygon class="cls-2" points="1500.97 630.49 872.73 1258.73 630.49 1016.49 388.25 1258.73 630.49 1500.97 872.73 1743.21 1743.21 872.73 1500.97 630.49"></polygon>
+              </g>
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="hidden md:flex gap-8 text-xs font-medium uppercase text-slate-400">
+        <a href="#overview" class="hoverable hover:text-cyan-400 transition-colors">
+          نظرة عامة
+        </a>
+
+        <a href="#pricing" class="hoverable hover:text-cyan-400 transition-colors">
+          الاستثمار
+        </a>
+      </div>
+      <div class="w-20"></div>
+      <!-- Spacer for layout balance -->
+    </nav>
+
+    <!-- CONTENT WRAPPER -->
+    <main class="main-content">
+      <!-- HERO -->
+      <header class="relative h-screen w-full flex items-center justify-center overflow-hidden">
+        <div class="section-label">[ 00. مقدمة ]</div>
+        <div class="absolute inset-0 z-0 parallax-bg" data-speed="0.4">
+          <!-- Tech Background -->
+          <img src="https://images.unsplash.com/photo-1639322537228-f710d846310a?q=80&amp;w=2832&amp;auto=format&amp;fit=crop" class="w-full h-full object-cover opacity-20 grayscale mix-blend-overlay scale-110" alt="Data Network">
+          <div class="absolute inset-0 bg-gradient-to-t from-[#050608] via-[#050608]/90 to-[#1E40AF]/10"></div>
+        </div>
+        <div class="relative z-10 text-center px-6 max-w-5xl">
+          <div class="mb-12 flex justify-center">
+            <div class="reveal-item fade-scale border border-cyan-900/30 bg-blue-950/20 backdrop-blur-md px-4 py-1.5 rounded text-[10px] font-mono uppercase text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.1)]">
+              تم الإعداد لـ لطيفة
+            </div>
+          </div>
+          <!-- MODIFIED HERO TITLE -->
+          <h1 class="font-hero text-4xl md:text-6xl lg:text-8xl font-semibold leading-[1.3] text-white mb-8 flex flex-col gap-6 tracking-tight">
+            <span class="block reveal-item fade-up">خطة واضحة.</span>
+            <span class="block reveal-item fade-up" style="transition-delay: 0.15s;">
+              تنفيذ سريع.
+            </span>
+            <span class="block text-gradient-brand reveal-item fade-up" style="transition-delay: 0.3s;">
+              نتائج أفضل
+            </span>
+          </h1>
+          <p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto reveal-item fade-up leading-relaxed mt-10" style="transition-delay: 0.4s;">
+            اهلاً وسهلا لطيفة, هذه الصفحة تحتوي على تفاصيل الباقة شاملة الخطة
+            المبدئية وحجم الاستثمار لتحقيق الاهداف التسويقية من خلال احدث حلول
+            التسويق بالذكاء الاصطناعي
+          </p>
+
+          <div class="mt-16 flex justify-center gap-12 reveal-item fade-up" style="transition-delay: 0.6s;">
+            <div class="text-right">
+              <div class="text-[10px] uppercase text-slate-500 font-semibold mb-1">
+                الجدول الزمني
+              </div>
+              <div class="font-mono text-sm text-cyan-100">3 أشهر</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- SECTION 1: DELIVERABLES GRID (Updated for Mobile Visibility) -->
+      <section id="overview" class="py-32 px-6 md:px-12 bg-[#050608] border-t border-white/5 relative">
+        <div class="section-label">[ 01. نطاق العمل ]</div>
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Card 1: Content Production -->
+          <div class="group cursor-pointer hoverable relative overflow-hidden rounded-lg aspect-[4/5] bg-[#0F1115] border border-white/5 hover:border-cyan-500/30 transition-colors duration-500">
+            <div class="absolute inset-0 opacity-40 group-hover:opacity-60 transition-opacity duration-700">
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/917d6f93-fb36-439a-8c48-884b67b35381_1600w.jpg" class="w-full h-full object-cover img-zoom-bw">
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0F1115] via-[#0F1115]/90 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 w-full p-6 z-30">
+              <h3 class="font-display text-lg font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors">
+                إنتاج المحتوى بالذكاء الاصطناعي
+              </h3>
+              <div class="transition-all duration-500 delay-100 overflow-hidden h-auto opacity-100 md:h-0 md:opacity-0 md:group-hover:h-auto md:group-hover:opacity-100">
+                <ul class="text-[10px] leading-relaxed text-slate-300 list-disc list-inside space-y-1.5 font-medium">
+                  <li>
+                    <strong class="text-white">
+                      الفيديوات القصيرة (10–25 ث):
+                    </strong>
+                    حتى 60 فيديو شهريًا.
+                  </li>
+                  <li>
+                    <strong class="text-white">
+                      الفيديوات الطويلة (30–60 ث):
+                    </strong>
+                    15 فيديو + 5 مجاناً.
+                  </li>
+                  <li>
+                    <strong class="text-white">الهدية (+5000 ريال):</strong>
+                    فيديو إعلاني احترافي.
+                  </li>
+                  <li>
+                    <strong class="text-white">جلسات تصوير AI:</strong>
+                    حتى 60 جلسة شهريًا.
+                  </li>
+                  <li>
+                    <strong class="text-white">بوستات AI:</strong>
+                    حتى 60 بوست شهريًا.
+                  </li>
+                  <li>
+                    <strong class="text-white">الستوري:</strong>
+                    يومية (حتى 60/شهر).
+                  </li>
+                  <li>
+                    <strong class="text-white">صناعة المحتوى:</strong>
+                    الأفكار، السكربتات، الكابشن.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Creative & Identity -->
+          <div class="group cursor-pointer hoverable relative overflow-hidden rounded-lg aspect-[4/5] bg-[#0F1115] border border-white/5 hover:border-cyan-500/30 transition-colors duration-500">
+            <div class="absolute inset-0 opacity-40 group-hover:opacity-60 transition-opacity duration-700">
+              <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&amp;w=2672&amp;auto=format&amp;fit=crop" class="w-full h-full object-cover img-zoom-bw">
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0F1115] via-[#0F1115]/90 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 w-full p-6 z-30">
+              <h3 class="font-display text-lg font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors">
+                التوجة الإبداعي والنظام البصري
+              </h3>
+              <div class="transition-all duration-500 delay-100 overflow-hidden h-auto opacity-100 md:h-0 md:opacity-0 md:group-hover:h-auto md:group-hover:opacity-100">
+                <ul class="text-[10px] leading-relaxed text-slate-300 list-disc list-inside space-y-1.5 font-medium">
+                  <li>تحسين وتوحيد أسلوب المحتوى مع هوية العلامة.</li>
+                  <li>
+                    <strong class="text-white">Brand Refresh:</strong>
+                    توحيد الألوان، الخطوط، الصور.
+                  </li>
+                  <li>تقييم الهوية البصرية أول 30 يوم وتقديم توصيات.</li>
+                  <li>
+                    <strong class="text-white">كتابة المحتوى:</strong>
+                    وصناعة نبرة العلامة التجارية.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Social Management -->
+          <div class="group cursor-pointer hoverable relative overflow-hidden rounded-lg aspect-[4/5] bg-[#0F1115] border border-white/5 hover:border-cyan-500/30 transition-colors duration-500">
+            <div class="absolute inset-0 opacity-40 group-hover:opacity-60 transition-opacity duration-700">
+              <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&amp;w=2670&amp;auto=format&amp;fit=crop" class="w-full h-full object-cover img-zoom-bw">
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0F1115] via-[#0F1115]/90 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 w-full p-6 z-30">
+              <h3 class="font-display text-lg font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors">
+                إدارة المنصات وتعزيز الظهور
+              </h3>
+              <div class="transition-all duration-500 delay-100 overflow-hidden h-auto opacity-100 md:h-0 md:opacity-0 md:group-hover:h-auto md:group-hover:opacity-100">
+                <ul class="text-[10px] leading-relaxed text-slate-300 list-disc list-inside space-y-1.5 font-medium">
+                  <li>تنسيق الحسابات + إبراز الهوية + ترتيب الواجهة.</li>
+                  <li>تنظيم Bio + Highlights + Pins لخدمة الهدف.</li>
+                  <li>جدولة ونشر المحتوى وفق خطة شهرية.</li>
+                  <li>
+                    <strong class="text-white">الأتمتة:</strong>
+                    إعداد انظمة الاتمتة.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: Ads -->
+          <div class="group cursor-pointer hoverable relative overflow-hidden rounded-lg aspect-[4/5] bg-[#0F1115] border border-white/5 hover:border-cyan-500/30 transition-colors duration-500">
+            <div class="absolute inset-0 opacity-40 group-hover:opacity-60 transition-opacity duration-700">
+              <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&amp;w=2670&amp;auto=format&amp;fit=crop" class="w-full h-full object-cover img-zoom-bw">
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0F1115] via-[#0F1115]/90 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 w-full p-6 z-30">
+              <h3 class="font-display text-lg font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors">
+                إدارة الحملات الإعلانية الممولة
+              </h3>
+              <div class="transition-all duration-500 delay-100 overflow-hidden h-auto opacity-100 md:h-0 md:opacity-0 md:group-hover:h-auto md:group-hover:opacity-100">
+                <ul class="text-[10px] leading-relaxed text-slate-300 list-disc list-inside space-y-1.5 font-medium">
+                  <li>
+                    إدارة
+                    <strong class="text-white">3 حملات شهريًا</strong>
+                    (تشغيل، متابعة، تحسين).
+                  </li>
+                  <li>إعداد وتوجيه الرسائل الإعلانية للحملات.</li>
+                  <li class="text-amber-500/80">
+                    *ميزانية الإعلانات غير مشمولة.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 5: Strategy -->
+          <div class="group cursor-pointer hoverable relative overflow-hidden rounded-lg aspect-[4/5] bg-[#0F1115] border border-white/5 hover:border-cyan-500/30 transition-colors duration-500">
+            <div class="absolute inset-0 opacity-40 group-hover:opacity-60 transition-opacity duration-700">
+              <img src="https://images.unsplash.com/photo-1639322537228-f710d846310a?q=80&amp;w=2832&amp;auto=format&amp;fit=crop" class="w-full h-full object-cover img-zoom-bw">
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0F1115] via-[#0F1115]/90 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 w-full p-6 z-30">
+              <h3 class="font-display text-lg font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors">
+                الاستراتيجية والاستشارات التسويقية
+              </h3>
+              <div class="transition-all duration-500 delay-100 overflow-hidden h-auto opacity-100 md:h-0 md:opacity-0 md:group-hover:h-auto md:group-hover:opacity-100">
+                <ul class="text-[10px] leading-relaxed text-slate-300 list-disc list-inside space-y-1.5 font-medium">
+                  <li>استراتيجية منصات التواصل واستراتيجية المحتوى.</li>
+                  <li>ملكية وثائق الاستراتيجية للعميل بعد العقد.</li>
+                  <li>
+                    <strong class="text-white">استشارات (3 أشهر):</strong>
+                    واتساب أو اجتماعات.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 6: Management & Reports -->
+          <div class="group cursor-pointer hoverable relative overflow-hidden rounded-lg aspect-[4/5] bg-[#0F1115] border border-white/5 hover:border-cyan-500/30 transition-colors duration-500">
+            <div class="absolute inset-0 opacity-40 group-hover:opacity-60 transition-opacity duration-700">
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/917d6f93-fb36-439a-8c48-884b67b35381_1600w.jpg" class="w-full h-full object-cover img-zoom-bw" style="filter: hue-rotate(45deg) grayscale(100%);">
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0F1115] via-[#0F1115]/90 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 w-full p-6 z-30">
+              <h3 class="font-display text-lg font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors">
+                إدارة الحساب والتقارير
+              </h3>
+              <div class="transition-all duration-500 delay-100 overflow-hidden h-auto opacity-100 md:h-0 md:opacity-0 md:group-hover:h-auto md:group-hover:opacity-100">
+                <ul class="text-[10px] leading-relaxed text-slate-300 list-disc list-inside space-y-1.5 font-medium">
+                  <li>
+                    <strong class="text-white">مدير تسويق:</strong>
+                    متابعة التنفيذ والتواصل.
+                  </li>
+                  <li>
+                    <strong class="text-white">التقارير:</strong>
+                    شهرية وختامية (أداء + توصيات).
+                  </li>
+                  <li>تثبيت Baseline وقياس التحسن شهرياً.</li>
+                  <li>
+                    <strong class="text-white">KPIs:</strong>
+                    الوعي، التفاعل، التحويل.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: TIMELINE (Horizontal) -->
+
+      <!-- SECTION 3: PLATFORM PREVIEW -->
+      <section class="py-32 bg-[#050608] overflow-hidden relative border-t border-white/5">
+        <div class="section-label">[ 03. عرض النظام ]</div>
+        <div class="text-center mb-16 relative z-10">
+          <h2 class="font-display text-3xl font-bold text-white mb-2">
+            واجهة الاستخدام
+          </h2>
+          <p class="text-slate-400">
+            قادم قريباً نظام كامل متكامل يساعدك في مراقبة ومعرفة كل جديد عن
+            المستجدات 24/7
+            <br>
+            <span class="block mt-3 text-cyan-400/90">
+              في الفترة المقبلة سيتم الاعتماد على نظام بوتيمايز في برنامج نوشن
+            </span>
+          </p>
+        </div>
+
+        <div id="video-expand" class="video-expand-wrapper group hoverable shadow-[0_0_50px_rgba(30,58,138,0.2)]">
+          <div class="absolute inset-0 bg-black/40 z-10 group-hover:bg-transparent transition-colors duration-500"></div>
+          <div class="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+            <div class="px-8 py-3 bg-blue-950/80 backdrop-blur-md rounded border border-cyan-500/20 text-white font-mono text-sm tracking-widest uppercase shadow-[0_0_20px_rgba(34,211,238,0.15)]">
+              قادم قريبا
+            </div>
+          </div>
+          <!-- Abstract Dashboard Image -->
+          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&amp;w=2670&amp;auto=format&amp;fit=crop" class="w-full h-full object-cover opacity-80 blur-md" alt="Dashboard Interface">
+        </div>
+      </section>
+
+      <!-- SECTION 4: INVESTMENT (Accordion) -->
+      <section id="pricing" class="py-32 px-6 md:px-12 bg-[#050608] border-t border-white/5 relative">
+        <div class="section-label">[ 04. الباقات ]</div>
+        <div class="max-w-6xl mx-auto">
+          <div class="text-center mb-12">
+            <h2 class="font-display text-3xl md:text-5xl font-bold text-white mb-6">
+              اختر خطتك
+            </h2>
+            <p class="text-slate-400">باقات مرنة مصممة خصيصاً لتحقيق أهدافك</p>
+          </div>
+
+          <!-- TABS HEADER -->
+          <div class="flex flex-wrap justify-center gap-4 mb-12">
+            <button onclick="switchPkg(0)" class="pkg-tab px-6 py-2 rounded-full border border-cyan-500 bg-cyan-500 text-black font-mono font-bold transition-all duration-300 hover:scale-105">
+              باقة 10,000
+            </button>
+            <button onclick="switchPkg(1)" class="pkg-tab px-6 py-2 rounded-full border border-white/10 bg-transparent text-slate-400 font-mono font-medium transition-all duration-300 hover:border-cyan-500/50 hover:text-cyan-400 hover:scale-105">
+              باقة 12,000
+            </button>
+            <button onclick="switchPkg(2)" class="pkg-tab px-6 py-2 rounded-full border border-white/10 bg-transparent text-slate-400 font-mono font-medium transition-all duration-300 hover:border-cyan-500/50 hover:text-cyan-400 hover:scale-105">
+              باقة 19,000
+            </button>
+          </div>
+
+          <!-- PACKAGES CONTENT -->
+          <div class="bg-[#0F1115] border border-white/10 rounded-2xl p-6 md:p-10 shadow-2xl min-h-[800px] relative overflow-hidden">
+            <!-- PACKAGE 1 (10,000) -->
+            <div id="pkg-0" class="pkg-content animate-fade-in block">
+              <div class="flex flex-col md:flex-row justify-between items-end border-b border-white/10 pb-6 mb-8">
+                <div>
+                  <h3 class="font-display text-3xl font-bold text-white mb-2">
+                    باقة الـ 10,000 ريال
+                  </h3>
+                  <p class="text-cyan-400 font-mono text-sm">
+                    الباقة الأساسية المتكاملة
+                  </p>
+                </div>
+                <div class="text-right mt-4 md:mt-0">
+                  <span class="block text-xs text-slate-500 uppercase tracking-widest">
+                    الاستثمار
+                  </span>
+                  <span class="font-mono text-2xl text-white">10,000 SAR</span>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                <div>
+                  <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="video" class="text-cyan-500 w-5 h-5"></i>
+                    إنتاج المحتوى AI
+                  </h4>
+                  <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                    <li>
+                      <span class="text-white font-semibold">
+                        الفيديوات القصيرة (10–25 ث):
+                      </span>
+                      8 فيديوات شهريًا (إجمالي 24).
+                    </li>
+                    <li>
+                      <span class="text-white font-semibold">
+                        الفيديوات المتوسطة/الطويلة (30–60 ث):
+                      </span>
+                      8 فيديوات طوال مدة الباقة.
+                    </li>
+                    <li>
+                      <span class="text-white font-semibold">بوستات AI:</span>
+                      10 بوستات شهريًا (إجمالي 30).
+                    </li>
+                    <li>
+                      صناعة المحتوى: توليد الأفكار، كتابة السكربتات والكابشن.
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="palette" class="text-cyan-500 w-5 h-5"></i>
+                    الهوية البصرية
+                  </h4>
+                  <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                    <li>إنشاء هوية بصرية كاملة متكاملة.</li>
+                    <li>كتابة المحتوى وصناعة نبرة العلامة التجارية.</li>
+                  </ul>
+                </div>
+                <div class="md:col-span-2 border-t border-white/5 pt-6">
+                  <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="smartphone" class="text-cyan-500 w-5 h-5"></i>
+                    إدارة المنصات
+                  </h4>
+                  <div class="grid md:grid-cols-2 gap-6">
+                    <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                      <li>
+                        تنسيق الحسابات وترتيب الواجهة (Bio/Highlights/Pins).
+                      </li>
+                      <li>جدولة ونشر المحتوى وفق خطة شهرية.</li>
+                    </ul>
+                    <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                      <li>
+                        إعداد أدوات الأتمتة (اشتراكات الأدوات على العميل).
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="megaphone" class="text-cyan-500 w-5 h-5"></i>
+                    الحملات الإعلانية
+                  </h4>
+                  <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                    <li>
+                      إدارة
+                      <span class="text-white">حملتين شهريًا</span>
+                      (تشغيل، متابعة، تحسين).
+                    </li>
+                    <li>إعداد وتوجيه الرسائل الإعلانية.</li>
+                    <li class="text-amber-500/80 text-xs">
+                      *ميزانية الإعلانات غير مشمولة.
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="map" class="text-cyan-500 w-5 h-5"></i>
+                    الاستراتيجية
+                  </h4>
+                  <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                    <li>استراتيجية المنصات والمحتوى.</li>
+                    <li>ملكية وثائق الاستراتيجية للعميل.</li>
+                    <li>استشارات لمدة 3 أشهر (واتساب أو اجتماعات).</li>
+                  </ul>
+                </div>
+                <div class="md:col-span-2 border-t border-white/5 pt-6 grid md:grid-cols-2 gap-8">
+                  <div>
+                    <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                      <i data-lucide="user-check" class="text-cyan-500 w-5 h-5"></i>
+                      إدارة الحساب
+                    </h4>
+                    <p class="text-sm text-slate-400 leading-relaxed">
+                      تخصيص مدير تسويق للعلامة كنقطة تواصل مباشرة لمتابعة
+                      التنفيذ وتنسيق المتطلبات.
+                    </p>
+                  </div>
+                  <div>
+                    <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                      <i data-lucide="bar-chart-3" class="text-cyan-500 w-5 h-5"></i>
+                      التقارير والقياس
+                    </h4>
+                    <ul class="space-y-2 text-sm text-slate-300 list-disc list-inside">
+                      <li>تقارير شهرية وختامية (أداء + توصيات).</li>
+                      <li>
+                        تثبيت Baseline وقياس الـ KPIs (وعي، تفاعل، تحويل).
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PACKAGE 2 (13,500) -->
+            <div id="pkg-1" class="pkg-content animate-fade-in hidden">
+              <div class="flex flex-col md:flex-row justify-between items-end border-b border-white/10 pb-6 mb-8">
+                <div>
+                  <h3 class="font-display text-3xl font-bold text-white mb-2">
+                    باقة الـ 12,000 ريال
+                  </h3>
+                  <p class="text-cyan-400 font-mono text-sm">
+                    خيار متميز بتركيز عالي
+                  </p>
+                </div>
+                <div class="text-right mt-4 md:mt-0">
+                  <span class="block text-xs text-slate-500 uppercase tracking-widest">
+                    الاستثمار
+                  </span>
+                  <span class="font-mono text-2xl text-white">12,000 SAR</span>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                <div>
+                  <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="video" class="text-cyan-500 w-5 h-5"></i>
+                    إنتاج المحتوى AI
+                  </h4>
+                  <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                    <li>
+                      <span class="text-white font-semibold">
+                        الفيديوات القصيرة (10–25 ث):
+                      </span>
+                      10 فيديوات شهريًا (إجمالي 30).
+                    </li>
+                    <li>
+                      <span class="text-white font-semibold">
+                        الفيديوات المتوسطة/الطويلة (30–60 ث):
+                      </span>
+                      8 فيديوات طوال مدة الباقة.
+                    </li>
+                    <li>
+                      <span class="text-white font-semibold">بوستات AI:</span>
+                      15 بوست شهريًا (إجمالي 45).
+                    </li>
+                    <li>
+                      صناعة المحتوى: توليد الأفكار، كتابة السكربتات والكابشن.
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="palette" class="text-cyan-500 w-5 h-5"></i>
+                    الهوية البصرية
+                  </h4>
+                  <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                    <li>إنشاء هوية بصرية كاملة متكاملة.</li>
+                    <li>كتابة المحتوى وصناعة نبرة العلامة التجارية.</li>
+                  </ul>
+                </div>
+                <div class="md:col-span-2 border-t border-white/5 pt-6">
+                  <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="smartphone" class="text-cyan-500 w-5 h-5"></i>
+                    إدارة المنصات
+                  </h4>
+                  <div class="grid md:grid-cols-2 gap-6">
+                    <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                      <li>
+                        تنسيق الحسابات وترتيب الواجهة (Bio/Highlights/Pins).
+                      </li>
+                      <li>جدولة ونشر المحتوى وفق خطة شهرية.</li>
+                    </ul>
+                    <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                      <li>
+                        إعداد أدوات الأتمتة (اشتراكات الأدوات على العميل).
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="megaphone" class="text-cyan-500 w-5 h-5"></i>
+                    الحملات الإعلانية
+                  </h4>
+                  <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                    <li>
+                      إدارة
+                      <span class="text-white">حملتين شهريًا</span>
+                      (تشغيل، متابعة، تحسين).
+                    </li>
+                    <li>إعداد وتوجيه الرسائل الإعلانية.</li>
+                    <li class="text-amber-500/80 text-xs">
+                      *ميزانية الإعلانات غير مشمولة.
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="map" class="text-cyan-500 w-5 h-5"></i>
+                    الاستراتيجية
+                  </h4>
+                  <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                    <li>استراتيجية المنصات والمحتوى.</li>
+                    <li>ملكية وثائق الاستراتيجية للعميل.</li>
+                    <li>استشارات لمدة 3 أشهر (واتساب أو اجتماعات).</li>
+                  </ul>
+                </div>
+                <div class="md:col-span-2 border-t border-white/5 pt-6 grid md:grid-cols-2 gap-8">
+                  <div>
+                    <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                      <i data-lucide="user-check" class="text-cyan-500 w-5 h-5"></i>
+                      إدارة الحساب
+                    </h4>
+                    <p class="text-sm text-slate-400 leading-relaxed">
+                      تخصيص مدير تسويق للعلامة كنقطة تواصل مباشرة لمتابعة
+                      التنفيذ وتنسيق المتطلبات.
+                    </p>
+                  </div>
+                  <div>
+                    <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                      <i data-lucide="bar-chart-3" class="text-cyan-500 w-5 h-5"></i>
+                      التقارير والقياس
+                    </h4>
+                    <ul class="space-y-2 text-sm text-slate-300 list-disc list-inside">
+                      <li>تقارير شهرية وختامية (أداء + توصيات).</li>
+                      <li>
+                        تثبيت Baseline وقياس الـ KPIs (وعي، تفاعل، تحويل).
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PACKAGE 3 (19,000) -->
+            <div id="pkg-2" class="pkg-content animate-fade-in hidden">
+              <div class="flex flex-col md:flex-row justify-between items-end border-b border-white/10 pb-6 mb-8">
+                <div>
+                  <h3 class="font-display text-3xl font-bold text-white mb-2">
+                    باقة الـ 19,000 ريال
+                  </h3>
+                  <p class="text-cyan-400 font-mono text-sm">
+                    الباقة الاحترافية الشاملة
+                  </p>
+                </div>
+                <div class="text-right mt-4 md:mt-0">
+                  <span class="block text-xs text-slate-500 uppercase tracking-widest">
+                    الاستثمار
+                  </span>
+                  <span class="font-mono text-2xl text-white">19,000 SAR</span>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                <div>
+                  <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="video" class="text-cyan-500 w-5 h-5"></i>
+                    إنتاج المحتوى AI
+                  </h4>
+                  <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                    <li>
+                      <span class="text-white font-semibold">
+                        الفيديوات القصيرة (10–25 ث):
+                      </span>
+                      عند الحاجة بحد 40 فيديو شهرياً (إجمالي 120).
+                    </li>
+                    <li>
+                      <span class="text-white font-semibold">
+                        الفيديوات المتوسطة/الطويلة (30–60 ث):
+                      </span>
+                      10 فيديوات طوال مدة الباقة.
+                    </li>
+                    <li>
+                      <span class="text-white font-semibold">بوستات AI:</span>
+                      عند الحاجة بسقف 60 بوست شهرياً (إجمالي 180).
+                    </li>
+                    <li>
+                      صناعة المحتوى: توليد الأفكار، كتابة السكربتات والكابشن.
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="palette" class="text-cyan-500 w-5 h-5"></i>
+                    الهوية البصرية
+                  </h4>
+                  <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                    <li>إنشاء هوية بصرية كاملة متكاملة.</li>
+                    <li>كتابة المحتوى وصناعة نبرة العلامة التجارية.</li>
+                  </ul>
+                </div>
+                <div class="md:col-span-2 border-t border-white/5 pt-6">
+                  <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="smartphone" class="text-cyan-500 w-5 h-5"></i>
+                    إدارة المنصات
+                  </h4>
+                  <div class="grid md:grid-cols-2 gap-6">
+                    <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                      <li>
+                        تنسيق الحسابات وترتيب الواجهة (Bio/Highlights/Pins).
+                      </li>
+                      <li>جدولة ونشر المحتوى وفق خطة شهرية.</li>
+                    </ul>
+                    <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                      <li>
+                        إعداد أدوات الأتمتة (اشتراكات الأدوات على العميل).
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="megaphone" class="text-cyan-500 w-5 h-5"></i>
+                    الحملات الإعلانية
+                  </h4>
+                  <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                    <li>
+                      إدارة
+                      <span class="text-white">حملتين شهريًا</span>
+                      (تشغيل، متابعة، تحسين).
+                    </li>
+                    <li>إعداد وتوجيه الرسائل الإعلانية.</li>
+                    <li class="text-amber-500/80 text-xs">
+                      *ميزانية الإعلانات غير مشمولة.
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="map" class="text-cyan-500 w-5 h-5"></i>
+                    الاستراتيجية
+                  </h4>
+                  <ul class="space-y-3 text-sm text-slate-300 list-disc list-inside">
+                    <li>استراتيجية المنصات والمحتوى.</li>
+                    <li>ملكية وثائق الاستراتيجية للعميل.</li>
+                    <li>استشارات لمدة 3 أشهر (واتساب أو اجتماعات).</li>
+                  </ul>
+                </div>
+                <div class="md:col-span-2 border-t border-white/5 pt-6 grid md:grid-cols-2 gap-8">
+                  <div>
+                    <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                      <i data-lucide="user-check" class="text-cyan-500 w-5 h-5"></i>
+                      إدارة الحساب
+                    </h4>
+                    <p class="text-sm text-slate-400 leading-relaxed">
+                      تخصيص مدير تسويق للعلامة كنقطة تواصل مباشرة لمتابعة
+                      التنفيذ وتنسيق المتطلبات.
+                    </p>
+                  </div>
+                  <div>
+                    <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                      <i data-lucide="bar-chart-3" class="text-cyan-500 w-5 h-5"></i>
+                      التقارير والقياس
+                    </h4>
+                    <ul class="space-y-2 text-sm text-slate-300 list-disc list-inside">
+                      <li>تقارير شهرية وختامية (أداء + توصيات).</li>
+                      <li>
+                        تثبيت Baseline وقياس الـ KPIs (وعي، تفاعل، تحويل).
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 5: APPROVAL (Magnetic) -->
+      <section class="h-[80vh] bg-[#050608] relative border-t border-white/5 flex items-center justify-center overflow-hidden">
+        <div class="section-label">[ 05. الخطوات التالية ]</div>
+        <canvas id="network-canvas"></canvas>
+
+        <div class="relative z-10 flex flex-col items-center">
+          <h2 class="font-display text-5xl md:text-7xl font-bold text-white mb-12 text-center mix-blend-screen tracking-tighter">
+            جاهز
+            <br>
+            للبدء؟
+          </h2>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer id="contact" class="footer-fixed pointer-events-none">
+      <div class="max-w-7xl w-full px-6 flex flex-col items-center text-center">
+        <div class="flex flex-col items-center justify-center gap-8 opacity-90 py-20">
+          <div class="w-32 md:w-48 text-slate-500 hover:text-cyan-500 transition-colors duration-500">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8239.44 2233.83" class="w-full h-auto fill-current">
+              <g id="Layer_2" data-name="Layer 2">
+                <g id="Layer_1-2" data-name="Layer 1">
+                  <path class="cls-1" d="M5258.39,2014.8a9.5,9.5,0,0,1,1.4,4.59v41.78a9.5,9.5,0,0,1-1.4,4.59c-1,1.65-2.83,2.48-5.67,2.48q-46.71,0-81.39-32.57v31.16q0,140.85-134.47,167L5012.08,2178q51-6.39,74.33-31.16t23.35-77.16V1726.38h61.57V1960c8.49,16.53,19,29.34,31.49,38.56s29.14,13.8,49.9,13.8C5255.56,2012.32,5257.44,2013.15,5258.39,2014.8ZM5106.92,1657v-71.5h66.54V1657Z"></path>
+                  <path class="cls-1" d="M5224.42,2068.24c-2.84,0-4.72-.95-5.67-2.81a10.86,10.86,0,0,1-1.42-4.26v-41.78a9.33,9.33,0,0,1,1.42-4.59c.95-1.65,2.83-2.48,5.67-2.48h140.13V1726.38h60.88v341.86Zm14.15,151.46v-71.5h66.54v71.5Zm133.05,0v-71.5h66.54v71.5Z"></path>
+                  <path class="cls-1" d="M5616.15,1997.44q14.51,14.88,44.24,14.88h14.15c2.83,0,4.71.83,5.67,2.48a9.6,9.6,0,0,1,1.4,4.59v41.78a9.6,9.6,0,0,1-1.4,4.59c-1,1.65-2.84,2.48-5.67,2.48h-25.47q-55.21,0-82.47-31.87t-27.24-83.52V1526.12h62.28v422.52Q5601.64,1982.61,5616.15,1997.44Z"></path>
+                  <path class="cls-1" d="M5954.47,1743.37q42.09,24,64,64.06a177.24,177.24,0,0,1,21.95,86.7q0,43.2-15.56,77.16,26.16,41,84.22,41c2.83,0,4.71.83,5.66,2.48a9.52,9.52,0,0,1,1.41,4.59v41.78a9.52,9.52,0,0,1-1.41,4.59c-1,1.65-2.83,2.48-5.66,2.48q-67.26,0-111.13-55.21-47.41,55.23-127.38,55.21H5674.54c-2.83,0-4.71-.95-5.66-2.81a10.86,10.86,0,0,1-1.42-4.26v-41.78a9.33,9.33,0,0,1,1.42-4.59c.95-1.65,2.83-2.48,5.66-2.48h57.32V1734.2q79.29-14.88,122.45-14.88Q5912.33,1719.32,5954.47,1743.37Zm-161,38.23v230.72h68.66q55.2,0,84.93-30.08t29.73-86q0-53.74-31.86-87.41t-90.59-33.6A276.09,276.09,0,0,0,5793.44,1781.6Z"></path>
+                  <path class="cls-1" d="M7205.85,1964.18q28.31,48.16,116.07,48.14c2.83,0,4.71.83,5.66,2.48a9.35,9.35,0,0,1,1.43,4.59v41.78a10.92,10.92,0,0,1-1.43,4.26c-.95,1.86-2.83,2.81-5.66,2.81q-49.53,0-81.39-14.18t-55.2-44.55a135.69,135.69,0,0,1-47.42,42.82q-29,15.93-65.11,15.91H6109.09c-2.83,0-4.71-.83-5.66-2.81a9.35,9.35,0,0,1-1.43-4.59v-41.78a9.35,9.35,0,0,1,1.43-4.59c.95-1.65,2.83-2.48,5.66-2.48h952.39q38.9,0,63.68-26.53t24.78-66.91V1723.57h61.57v201A148.41,148.41,0,0,1,7205.85,1964.18Zm-150,255.52v-71.5h66.51v71.5Zm133.05,0v-71.5h66.53v71.5Z"></path>
+                  <path class="cls-1" d="M7321.92,2068.24c-2.83,0-4.71-.95-5.66-2.81a10.92,10.92,0,0,1-1.43-4.26v-41.78a9.35,9.35,0,0,1,1.43-4.59c.95-1.65,2.83-2.48,5.66-2.48h140.14V1726.38h60.87v341.86Zm67.94-411.2v-71.5h66.53V1657Zm133.07,0v-71.5h66.52V1657Z"></path>
+                  <path class="cls-1" d="M7996.41,2014.8a9.5,9.5,0,0,1,1.4,4.59v41.78a9.5,9.5,0,0,1-1.4,4.59c-.95,1.65-2.83,2.48-5.66,2.48h-71.5q-.7,73.58-41.76,112.9t-121,52.69L7731,2178q64.41-9.91,95.19-34.34t30.79-75.38V1783q-34.68-7.74-63-7.77-53.81,0-84.22,35t-30.44,88.81q0,47.42,29,80.34t81.39,32.89h44.59l-24.77,55.92H7786.2q-53.1,0-91.66-23.35a154.21,154.21,0,0,1-58.75-63q-20.15-39.67-20.16-87.08a180.16,180.16,0,0,1,21.59-86.33q21.57-40.35,63-64.76t97.32-24.42q39.61,0,101.91,12c3.31.5,9.92,1.66,19.82,3.56v277.42h71.5C7993.58,2012.32,7995.46,2013.15,7996.41,2014.8Z"></path>
+                  <path class="cls-1" d="M7990.75,2068.24c-2.84,0-4.72-.95-5.67-2.81a10.86,10.86,0,0,1-1.42-4.26v-41.78a9.33,9.33,0,0,1,1.42-4.59c.95-1.65,2.83-2.48,5.67-2.48h89.18V1726.38h61.57v341.86Zm82.09,151.46v-71.5h66.54v71.5Z"></path>
+                  <path class="cls-1" d="M2555.53,364.21c-77.72,0-344,8.93-462.78,15.18v1031h259.09V1062h10.72c52.71,21.44,124.18,33.06,204.59,33.06,261.77,0,381.49-116.14,381.49-367.19C2948.64,473.2,2826.24,364.21,2555.53,364.21Zm-25,541.41H2351.84V550h178.68C2635.94,550,2669,592,2669,727.83S2635.94,905.62,2530.52,905.62Z"></path>
+                  <path class="cls-1" d="M3464.14,603.64c-288.58,0-411,122.4-411,411s122.39,411,411,411,411-122.39,411-411S3752.71,603.64,3464.14,603.64Zm.89,655.77c-111.67,0-150.09-59.86-150.09-244.8,0-185.83,38.42-243.9,150.09-243.9,114.36,0,148.31,52.71,148.31,243.9S3579.39,1259.41,3465,1259.41Z"></path>
+                  <path class="cls-1" d="M4320,1243.32c-53.61,0-75.94-24.11-75.94-81.29V788.58h169.75V618.83H4244.09V394.58l-246.58,14.3v777.27c0,173.32,66.11,239.43,238.54,239.43,72.37,0,151-10.72,201.91-28.59V1243.32Z"></path>
+                  <path class="cls-1" d="M4588.05,634.91V1410.4h245.69V618.83Zm125.08-315.37c-115.25,0-146.52,22.33-146.52,104.52s33.06,104.53,146.52,104.53c111.68,0,140.27-22.33,140.27-104.53S4824.81,319.54,4713.13,319.54Z"></path>
+                  <path class="cls-1" d="M6331.55,634.91V1410.4h245.69V618.83Zm125.08-315.37c-115.25,0-146.52,22.33-146.52,104.52s33.05,104.53,146.52,104.53c111.67,0,140.26-22.33,140.26-104.53S6568.3,319.54,6456.63,319.54Z"></path>
+                  <path class="cls-1" d="M5862.06,603.64c-116.14,0-224.25,24.13-282.32,58.08h-8.93c-55.39-38.43-134.9-58.08-239.44-58.08-92,0-228.71,15.19-349.32,38.42V1410.4h246.58V772.5h113.46c91.13,0,116.15,26.8,116.15,124.18V1410.4h246.58V772.5h114.36c89.34,0,116.14,28.59,116.14,124.18V1410.4H6181.9V905.62C6181.9,692.09,6086.31,603.64,5862.06,603.64Z"></path>
+                  <path class="cls-1" d="M7390.7,772.5V618.83H6724.21V802H6969c43.78,0,76.84-.89,115.25-5.36l6.26,9.83c-19.66,15.18-49.14,43.77-81.3,82.19l-285,354.68V1410.4H7390.7V1226.35H7163.77c-49.14,0-88.45,1.79-133.12,8l-6.26-12.51c24.13-25,50.93-56.28,91.13-106.31Z"></path>
+                  <path class="cls-1" d="M8239.44,911c0-196.56-117.93-307.34-352.9-307.34-282.32,0-419.9,137.59-419.9,407.4,0,288.57,139.37,414.54,472.61,414.54,91.13,0,191.19-8,265.35-22.33l-17.87-152.78c-64.33,4.47-144.74,7.15-214.42,7.15-194.77,0-260-53.61-263.56-186.72h402C8201.91,1070.9,8239.44,1026.22,8239.44,911Zm-235.86,21.44H7707.86c0-115.25,53.6-175.11,165.28-175.11,89.34,0,130.44,35.73,130.44,115.25Z"></path>
+                  <rect class="cls-2" x="263.95" y="233.25" width="342.58" height="888.46" transform="translate(606.53 -109.33) rotate(45)"></rect>
+                  <rect class="cls-3" x="527.9" y="141.9" width="685.15" height="685.15" transform="translate(597.53 -473.62) rotate(45)"></rect>
+                  <polygon class="cls-2" points="1500.97 630.49 872.73 1258.73 630.49 1016.49 388.25 1258.73 630.49 1500.97 872.73 1743.21 1743.21 872.73 1500.97 630.49"></polygon>
+                </g>
+              </g>
+            </svg>
+          </div>
+          <div class="text-center font-display space-y-2">
+            <p class="text-slate-500 font-bold text-lg md:text-xl">
+              مجموعة بوتمايز لخدمات الإعمال
+            </p>
+            <p class="text-slate-600 font-mono text-xs md:text-sm tracking-widest">
+              الرقم الموحد 7053004953
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- LOGIC SYSTEM -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+                lucide.createIcons();
+
+                // --- PRELOADER ---
+                const preloader = document.getElementById('preloader');
+                const progress = document.getElementById('loader-progress');
+                const text = document.getElementById('loader-text');
+                let loadVal = 0;
+                const loadInterval = setInterval(() => {
+                    loadVal += Math.floor(Math.random() * 10) + 1;
+                    if(loadVal > 100) loadVal = 100;
+                    if(progress) progress.style.width = loadVal + '%';
+                    if(loadVal === 100) {
+                        if(text) text.innerText = "النظام جاهز";
+                        clearInterval(loadInterval);
+                        setTimeout(() => preloader && preloader.classList.add('loaded'), 500);
+                    }
+                }, 30);
+
+                // --- CURSOR ---
+                const cursorDot = document.querySelector('.cursor-dot');
+                const cursorCircle = document.querySelector('.cursor-circle');
+                let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0;
+                // Only enable custom cursor on non-touch devices for performance
+                if (window.matchMedia('(hover: hover)').matches) {
+                    document.addEventListener('mousemove', (e) => {
+                        mouseX = e.clientX; mouseY = e.clientY;
+                        if(cursorDot) { cursorDot.style.left = mouseX + 'px'; cursorDot.style.top = mouseY + 'px'; }
+                    });
+                    function animateCursor() {
+                        cursorX += (mouseX - cursorX) * 0.15; cursorY += (mouseY - cursorY) * 0.15;
+                        if(cursorCircle) { cursorCircle.style.left = cursorX + 'px'; cursorCircle.style.top = cursorY + 'px'; }
+                        requestAnimationFrame(animateCursor);
+                    }
+                    animateCursor();
+                    document.querySelectorAll('.hoverable').forEach(el => {
+                        el.addEventListener('mouseenter', () => cursorCircle && cursorCircle.classList.add('hovered'));
+                        el.addEventListener('mouseleave', () => cursorCircle && cursorCircle.classList.remove('hovered'));
+                    });
+                } else {
+                    if(cursorDot) cursorDot.style.display = 'none';
+                    if(cursorCircle) cursorCircle.style.display = 'none';
+                }
+
+                // --- REVEALS ---
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('active');
+                            if(entry.target.classList.contains('split-line')) {
+                                const spans = entry.target.querySelectorAll('span');
+                                spans.forEach((s, i) => s.style.transform = 'translateY(0)');
+                            }
+                        }
+                    });
+                }, { threshold: 0.1 });
+                document.querySelectorAll('.reveal-item, .split-line').forEach(el => observer.observe(el));
+
+                // --- SCROLL LOGIC ---
+                const horizontalSection = document.getElementById('roadmap');
+                const horizontalTrack = document.getElementById('horizontal-track');
+                const progressBar = document.getElementById('progress-bar');
+                const videoSection = document.getElementById('video-expand');
+
+                window.addEventListener('scroll', () => {
+                    const scrollTop = window.scrollY;
+                    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                    if(progressBar) progressBar.style.width = (scrollTop / docHeight * 100) + '%';
+
+                    // Parallax
+                    document.querySelectorAll('.parallax-bg').forEach(bg => {
+                        const speed = bg.getAttribute('data-speed');
+                        if(bg.querySelector('img')) bg.querySelector('img').style.transform = `translateY(${scrollTop * speed}px) scale(1.1)`;
+                    });
+
+                    // Roadmap Horizontal Scroll (Desktop Only)
+                    if(horizontalSection && horizontalTrack && window.innerWidth >= 768) {
+                        const offset = horizontalSection.offsetTop;
+                        const height = horizontalSection.offsetHeight;
+                        const winH = window.innerHeight;
+                        let pct = (scrollTop - offset) / (height - winH);
+                        pct = Math.max(0, Math.min(1, pct));
+                        const maxScroll = Math.max(0, horizontalTrack.scrollWidth - window.innerWidth);
+                        const move = maxScroll * pct;
+                        horizontalTrack.style.transform = `translateX(${move}px)`;
+                    }
+
+                    // Video Expansion (Desktop Only)
+                    if(videoSection && window.innerWidth >= 768) {
+                        const rect = videoSection.getBoundingClientRect();
+                        const centerDist = Math.abs(rect.top + rect.height/2 - window.innerHeight/2);
+                        if(centerDist < window.innerHeight * 0.6) {
+                            const expand = 1 - (centerDist / (window.innerHeight*0.6));
+                            videoSection.style.width = Math.min(60 + (expand * 40), 100) + '%';
+                            videoSection.style.borderRadius = (12 * (1-expand)) + 'px';
+                        }
+                    }
+                });
+
+                // --- CANVAS PARTICLES ---
+                const canvas = document.getElementById('network-canvas');
+                if(canvas) {
+                    const ctx = canvas.getContext('2d');
+                    let width, height, particles = [];
+                    function resize() {
+                        if(canvas.parentElement) {
+                            width = canvas.width = canvas.parentElement.offsetWidth;
+                            height = canvas.height = canvas.parentElement.offsetHeight;
+                            initParticles();
+                        }
+                    }
+                    function initParticles() {
+                        particles = [];
+                        const count = window.innerWidth < 768 ? 10 : 40;
+                        for(let i=0; i<count; i++) particles.push({
+                            x: Math.random()*width,
+                            y: Math.random()*height,
+                            vx: (Math.random()-0.5)*0.2,
+                            vy: (Math.random()-0.5)*0.2,
+                            size: Math.random()*1.5,
+                            color: Math.random() > 0.5 ? '#22D3EE' : '#1E40AF'
+                        });
+                    }
+                    function draw() {
+                        ctx.clearRect(0,0,width,height);
+                        particles.forEach(p => {
+                            p.x += p.vx; p.y += p.vy;
+                            if(p.x < 0 || p.x > width) p.vx *= -1; if(p.y < 0 || p.y > height) p.vy *= -1;
+                            ctx.fillStyle = p.color;
+                            ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+                            particles.forEach(p2 => {
+                                const dx = p.x - p2.x; const dy = p.y - p2.y; const dist = Math.sqrt(dx*dx + dy*dy);
+                                if(dist < 100) {
+                                    ctx.strokeStyle = `rgba(34, 211, 238, ${0.1 - dist/1000})`;
+                                    ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+                                }
+                            });
+                        });
+                        requestAnimationFrame(draw);
+                    }
+                    window.addEventListener('resize', resize); resize(); draw();
+                }
+            });
+    </script>
+
+    <script>
+      function switchPkg(index) {
+        // Buttons
+        const btns = document.querySelectorAll('.pkg-tab');
+        btns.forEach((b, i) => {
+          if(i === index) {
+            b.classList.add('bg-cyan-500', 'text-black', 'border-cyan-500');
+            b.classList.remove('bg-transparent', 'text-slate-400', 'border-white/10');
+          } else {
+            b.classList.remove('bg-cyan-500', 'text-black', 'border-cyan-500');
+            b.classList.add('bg-transparent', 'text-slate-400', 'border-white/10');
+          }
+        });
+        // Content
+        const contents = document.querySelectorAll('.pkg-content');
+        contents.forEach((c, i) => {
+          if(i === index) {
+            c.classList.remove('hidden');
+            c.classList.add('block');
+            // Refresh icons if needed
+            if(window.lucide) lucide.createIcons();
+          } else {
+            c.classList.add('hidden');
+            c.classList.remove('block');
+          }
+        });
+      }
+    </script>
+  
+</body></html>
